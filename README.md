@@ -1,0 +1,100 @@
+# temp_liq_jet
+
+**temp_liq_jet** is a Python package for computing the temperature of liquid jets
+(**water, argon, krypton**) in vacuum using the **Knudsen evaporative cooling model**.
+
+The package solves coupled **mass evaporation and heat transport equations** for concentric shells and
+provides interpolated profiles for temperatures, jet radius, and mass loss along the jet.
+
+---
+
+## Features
+
+- Evaporative cooling of liquid jets and droplets
+- Supported liquids: **water, argon, krypton**
+- Cylindrical (filament) and spherical (droplet) geometries
+- Coupled mass and heat transport solved using **SciPy ODE solvers**
+- Interpolated profiles for:
+  - Shell temperatures
+  - Jet / droplet radius
+  - Average, surface, and core temperatures
+- Multiple density and heat-capacity models for water
+
+---
+
+## Installation
+
+Install from TestPyPI:
+
+```bash
+python -m pip install temp_liq_jet
+```
+
+---
+
+## Quick start
+
+```python
+from temp_liq_jet import KnudsenModel
+
+liquid_jet = KnudsenModel(
+    liquid="water",             # 'water', 'argon', or 'krypton'
+    w_cp_model="Angell1982",    # Water heat capacity model ('Angell1982', 'Archer2000', 'Pathak2021')
+    w_rho_model="Hare1987",     # Water density model ('Hare1987', 'Caupin2019')
+    D=3,                        # Geometry, with 2 = filament, 3 = droplet
+    T_nozzle=292,               # Nozzle temperature (K)
+    d=8e-6,                     # Initial jet/droplet diameter (m)
+    v=20.0,                     # Jet velocity (m/s)
+    N=100,                      # Number of concentric shells
+    z_end_mm=10,                # Integration length (mm)
+    evap_coef=0.9,              # Evaporation coefficient. Default is 1
+    p_amb=0.1,                  # Ambient pressure (mbar). Default is 0 mbar
+    accuracy='high'             # Numerical accuracy, which can be set to 'low', 'medium' (default), or 'high'
+)
+```
+
+## Accessing simulation results
+
+Retrieve normalized outer shell mass
+```python
+z_mass, mass = liquid_jet.norm_mass()
+```
+
+Retrieve interpolated temperature splines
+```python
+z_range, T_shell_splines = liquid_jet.temperature()
+```
+
+Interpolated average jet temperature
+```python
+avg_temp_spline = liquid_jet.avg_temperature()
+```
+
+Interpolated surface and core temperatures
+```python
+surface_temp_spline = liquid_jet.surface_temp()
+core_temp_spline = liquid_jet.core_temp()
+```
+
+Interpolated jet radius
+```python
+radius_spline = liquid_jet.radius()
+```
+
+## Evaluate any quantity at a given distance z
+
+```python
+z_point = 0.005  # m
+avg_temp = avg_temp_spline(z_point)
+surface_temp = surface_temp_spline(z_point)
+core_temp = core_temp_spline(z_point)
+radius = radius_spline(z_point)
+```
+
+
+## Credits
+
+Please cite as:
+
+C. Goy, R. E. Grisenti (2026)  
+*KnudsenModel: A Physically Consistent Python Framework for Computing Evaporative Cooling of Liquid Jets*  
