@@ -24,7 +24,7 @@ provides interpolated profiles for temperatures, jet radius, and mass loss along
 
 ## Installation
 
-Install from TestPyPI:
+Install the package via terminal:
 
 ```bash
 python -m pip install temp_liq_jet
