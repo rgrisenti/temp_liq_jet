@@ -1,9 +1,10 @@
 Metadata-Version: 2.4
 Name: temp_liq_jet
-Version: 0.1.18
+Version: 0.2.0
 Summary: Python framework for computing evaporative cooling of liquid jets in vacuum using the Knudsen model
 Author-email: Robert Grisenti <grisenti@atom.uni-frankfurt.de>
 License-Expression: MIT
+Project-URL: Homepage, https://github.com/rgrisenti/temp_liq_jet
 Classifier: Programming Language :: Python :: 3
 Classifier: Operating System :: OS Independent
 Requires-Python: >=3.9

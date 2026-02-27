@@ -1,1 +1,1 @@
-from .temp_liq_jet import KnudsenModel
+from .knudsen import KnudsenModel
