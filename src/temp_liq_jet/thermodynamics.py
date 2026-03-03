@@ -49,8 +49,9 @@ def rho(liquid, w_rho_model, T):
             # Apply polynomial 1 only to low-T part
             t_low = T[mask_low] - 273.15 # Conversion to (°C)
             T_high = T[mask_high]
+            
             density[mask_low] = (33169.4610493092
-                                 + 7162.69779018419*T_low
+                                 + 7162.69779018419*t_low
                                  + 692.242318914883*t_low**2
                                  + 37.9196754533035*t_low**3
                                  + 1.2871452602957*t_low**4
