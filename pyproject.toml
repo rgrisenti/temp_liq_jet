@@ -1,6 +1,6 @@
 [project]
 name = "temp_liq_jet"
-version = "0.2.1"
+version = "0.2.2"
 description = "Python framework for computing evaporative cooling of liquid jets in vacuum using the Knudsen model"
 readme = "README.md"
 requires-python = ">=3.9"

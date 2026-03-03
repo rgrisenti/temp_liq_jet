@@ -5,6 +5,11 @@ def rho(liquid, w_rho_model, T):
     """
     Return the density of the liquid at temperature T.
 
+    For water:
+    - 'Caupin2019' is used for T >= 273.15 K, which is the only accurate model above melting.
+    - If w_rho_model='Hare1987', Hare1987 is used only for T < 273.15 K.
+    - Mixed temperature arrays are handled element-wise.
+
     Parameters
     ----------
     liquid      : {'argon', 'krypton', 'water'}
@@ -32,57 +37,65 @@ def rho(liquid, w_rho_model, T):
         return 909.2*(1 + 2.422741*rT**0.448)
 
     elif liquid == 'water':
-        """
-        For water:
-        - 'Caupin2019' is used for T >= 273.15 K, which is the only valid model above melting.
-        - If w_rho_model='Hare1987', Hare1987 is used only for T < 273.15 K.
-        - Mixed temperature arrays are handled element-wise.
-        """
         # Ensures array-like operations
         T = np.asarray(T)
 
-        density_C = np.empty_like(T, dtype = float)
+        density = np.empty_like(T, dtype = float)        
 
-        mask_low = T < 239
-        mask_high = ~mask_low
-        # Apply polynomial 1 only to low-T part
-        T_low = T[mask_low] - 273.15 # Conversion to (°C)
-        density_C[mask_low] = (33169.4610493092 + 7162.69779018419*T_low
-                               + 692.242318914883*T_low**2
-                               + 37.9196754533035*T_low**3
-                               + 1.2871452602957*T_low**4
-                               + 0.0277132359010566*T_low**5
-                               + 3.69466713035065e-4*T_low**6
-                               + 2.78777027355768e-6*T_low**7
-                               + 9.11410008186836e-9*T_low**8)
-        # Apply polynomial 2 only to high-T part
-        density_C[mask_high] = (-671649.56609929 + 14584.455054882*T[mask_high]
-                                - 131.95828285732*T[mask_high]**2
-                                + 0.63749917015289*T[mask_high]**3
-                                - 0.001733846814305*T[mask_high]**4
-                                + 2.516524948219e-6*T[mask_high]**5
-                                - 1.5225226829696e-9*T[mask_high]**6)
+        if w_rho_model == 'Caupin2019':
 
+            mask_low = T < 239
+            mask_high = ~mask_low
+            # Apply polynomial 1 only to low-T part
+            t_low = T[mask_low] - 273.15 # Conversion to (°C)
+            T_high = T[mask_high]
+            density[mask_low] = (33169.4610493092
+                                 + 7162.69779018419*T_low
+                                 + 692.242318914883*t_low**2
+                                 + 37.9196754533035*t_low**3
+                                 + 1.2871452602957*t_low**4
+                                 + 0.0277132359010566*t_low**5
+                                 + 3.69466713035065e-4*t_low**6
+                                 + 2.78777027355768e-6*t_low**7
+                                 + 9.11410008186836e-9*t_low**8)
+            # Apply polynomial 2 only to high-T part
+            density[mask_high] = (-671649.56609929
+                                  + 14584.455054882*T_high
+                                  - 131.95828285732*T_high**2
+                                  + 0.63749917015289*T_high**3
+                                  - 0.001733846814305*T_high**4
+                                  + 2.516524948219e-6*T_high**5
+                                  - 1.5225226829696e-9*T_high**6)
         
-        # Now check whether the user has chosen the 'Hare1987' parametrization
         if w_rho_model == 'Hare1987':
-            t = T - 273.15 # Conversion to (°C)
-            # Density in (g/ml)
-            density_H = (0.99986
-                         + 6.69e-05*t
-                         - 8.484e-06*t**2
-                         + 1.518e-07*t**3
-                         - 6.9484e-09*t**4
-                         - 3.6449e-10*t**5
-                         - 7.497e-12*t**6)
 
-            density_H = density_H*1000 # Conversion to (kg/m^3)
-            density = np.where(T >= 273.15, density_C, density_H)
-            return density.item() if density.ndim == 0 else density
+            mask_below_Tm = T < 273.15      # 'Hare1987' valid below melting
+            mask_above_Tm = ~mask_below_Tm  # 'Caupin2019' is the only accurate model above melting
 
-        elif w_rho_model == 'Caupin2019':
-            return density_C.item() if density_C.ndim == 0 else density_C
+            if np.any(mask_below_Tm):
+                t = T[mask_below_Tm] - 273.15 # Conversion to (°C)
 
+                density[mask_below_Tm] = (0.99986
+                                          + 6.69e-05*t
+                                          - 8.484e-06*t**2
+                                          + 1.518e-07*t**3
+                                          - 6.9484e-09*t**4
+                                          - 3.6449e-10*t**5
+                                          - 7.497e-12*t**6
+                )*1000 # Density in (kg/m^3)
+
+            if np.any(mask_above_Tm):
+                T_high = T[mask_above_Tm]
+
+                density[mask_above_Tm] = (-671649.56609929
+                                          + 14584.455054882*T_high
+                                          - 131.95828285732*T_high**2
+                                          + 0.63749917015289*T_high**3
+                                          - 0.001733846814305*T_high**4
+                                          + 2.516524948219e-6*T_high**5
+                                          - 1.5225226829696e-9*T_high**6)
+
+        return density.item() if density.ndim == 0 else density
 
 def c_p(liquid, w_cp_model, T):
     """
