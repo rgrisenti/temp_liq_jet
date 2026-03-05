@@ -38,6 +38,8 @@ class KnudsenModel:
                   Integration length in millimeters.
     p_amb       : float
                   Ambient pressure (mbar). Default is 0 mbar.
+    evap_coef   : float
+                  Evaporation coefficient. Default is 1.
     accuracy    : {'low', 'medium', 'high'}
                   Define mapping from accuracy level to solver tolerances. Default is 'medium'.
 
