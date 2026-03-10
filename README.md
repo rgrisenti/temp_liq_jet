@@ -34,63 +34,61 @@ python -m pip install temp_liq_jet
 
 ## Quick start
 
+One can for example compute the average, surface, and core temperatures for a water droplet as follows.
+
 ```python
+import matplotlib.pyplot as plt
 from temp_liq_jet import KnudsenModel
+import numpy as np
+
 
 liquid_jet = KnudsenModel(
     liquid="water",             # 'water', 'argon', or 'krypton'
     w_cp_model="Angell1982",    # Water heat capacity model ('Angell1982', 'Archer2000', 'Pathak2021')
     w_rho_model="Hare1987",     # Water density model ('Hare1987', 'Caupin2019')
     D=3,                        # Geometry, with 2 = filament, 3 = droplet
-    T_nozzle=292,               # Nozzle temperature (K)
+    T_nozzle=290,               # Nozzle temperature (K)
     d=8e-6,                     # Initial jet/droplet diameter (m)
     v=20.0,                     # Jet velocity (m/s)
-    N=100,                      # Number of concentric shells
-    z_end_mm=10,                # Integration length (mm)
-    evap_coef=0.9,              # Evaporation coefficient. Default is 1
-    p_amb=0.1,                  # Ambient pressure (mbar). Default is 0 mbar
-    accuracy='high'             # Numerical accuracy, which can be set to 'low', 'medium' (default), or 'high'
+    N=80,                      # Number of concentric shells
+    z_end_mm=20,                # Integration length (mm)
 )
-```
-
-## Accessing simulation results
-
-Retrieve normalized outer shell mass
-```python
-z_mass, mass = liquid_jet.norm_mass()
 ```
 
 Retrieve interpolated temperature splines
 ```python
-z_range, T_shell_splines = liquid_jet.temperature()
+avg_temp = liquid_jet.avg_temperature()
+surface_temp = liquid_jet.surface_temp()
+core_temp = liquid_jet.core_temp()
 ```
 
-Interpolated average jet temperature
+Generate distances along the jet
 ```python
-avg_temp_spline = liquid_jet.avg_temperature()
+z_points = np.linspace(0, 0.02, 200)  # in meters
 ```
 
-Interpolated surface and core temperatures
+Plot
 ```python
-surface_temp_spline = liquid_jet.surface_temp()
-core_temp_spline = liquid_jet.core_temp()
+fig, ax = plt.subplots(figsize=(6,4))
+ax.plot(z_points*1000, avg_temp(z_points), label="Average Temperature", color="purple")
+ax.plot(z_points*1000, surface_temp(z_points), label="Surface Temperature", color="blue")
+ax.plot(z_points*1000, core_temp(z_points), label="Core Temperature", color="red")
+
+ax.set_xlabel(r"$z$ (mm)")
+ax.set_ylabel(r"$T$ (K)")
+ax.set_xlim(0, 20)
+ax.set_ylim(230, 290)
+ax.legend()
+ax.grid(True)
+ax.minorticks_on()
+ax.grid(True, alpha = 0.4)
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+
+plt.show()
 ```
 
-Interpolated jet radius
-```python
-radius_spline = liquid_jet.radius()
-```
-
-## Evaluate any quantity at a given distance z
-
-```python
-z_point = 0.005  # m
-avg_temp = avg_temp_spline(z_point)
-surface_temp = surface_temp_spline(z_point)
-core_temp = core_temp_spline(z_point)
-radius = radius_spline(z_point)
-```
-
+![Temperature profiles](images/example_temperature.png)
 
 ## Credits
 
