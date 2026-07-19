@@ -94,5 +94,6 @@ plt.show()
 
 Please cite as:
 
-C. Goy, R. E. Grisenti (2026)  
-*KnudsenModel: A Physically Consistent Python Framework for Computing Evaporative Cooling of Liquid Jets*  
+C. Goy, R. E. Grisenti  
+*KnudsenModel: A physically consistent Python framework for computing evaporative cooling of liquid jets*.  
+Comput. Phys. Commun. **327**, 110289 (2026) 
